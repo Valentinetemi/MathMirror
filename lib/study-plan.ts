@@ -25,6 +25,11 @@ export function createPlan(courseName: string, syllabusName: string, syllabusTex
   return { courseName: courseName.trim() || 'My maths course', syllabusName, createdAt: new Date().toISOString(), order: null, topics: topics.map(topic => ({ ...topic, complete: false })) }
 }
 
+/** Builds a plan from a topic list the AI extracted from a real syllabus, instead of the keyword-matched starter set. */
+export function createPlanFromTopics(courseName: string, syllabusName: string, topics: { title: string; description: string }[]): StudyPlan {
+  return { courseName: courseName.trim() || 'My maths course', syllabusName, createdAt: new Date().toISOString(), order: null, topics: topics.map(topic => ({ ...topic, complete: false })) }
+}
+
 export function getStudyPlan(): StudyPlan | null {
   if (typeof window === 'undefined') return null
   try { const value = localStorage.getItem(PLAN_KEY); return value ? JSON.parse(value) : null } catch { return null }

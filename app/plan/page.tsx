@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { ArrowDown, ArrowUp, FileText, Sparkles, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { createPlan, getOrderedTopics, getStudyPlan, saveStudyPlan, setLearningOrder, type StudyPlan } from '@/lib/study-plan'
+import { createPlan, createPlanFromTopics, getOrderedTopics, getStudyPlan, saveStudyPlan, setLearningOrder, type StudyPlan } from '@/lib/study-plan'
+import { parseSyllabusWithAI } from '@/lib/actions/parse-syllabus'
 import { RoadmapPath } from '@/components/roadmap-path'
 import { SusieNote } from '@/components/susie-note'
 
@@ -12,19 +13,31 @@ export default function PlanPage() {
   const [courseName, setCourseName] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [isMakingPlan, setIsMakingPlan] = useState(false)
+  const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   const makePlan = async () => {
     if (!file && !courseName.trim()) return
     setIsMakingPlan(true)
-    let text = ''
-    if (file?.type.startsWith('text/')) text = await file.text()
-    window.setTimeout(() => {
+    setError('')
+    const text = file?.type.startsWith('text/') ? await file.text() : ''
+
+    if (text.trim()) {
+      const result = await parseSyllabusWithAI(courseName, text)
+      if (!result.ok) {
+        setError(result.error)
+        setIsMakingPlan(false)
+        return
+      }
+      const nextPlan = createPlanFromTopics(courseName, file?.name || 'Your course outline', result.topics)
+      saveStudyPlan(nextPlan)
+      setPlan(nextPlan)
+    } else {
       const nextPlan = createPlan(courseName, file?.name || 'Your course outline', text)
       saveStudyPlan(nextPlan)
       setPlan(nextPlan)
-      setIsMakingPlan(false)
-    }, 900)
+    }
+    setIsMakingPlan(false)
   }
 
   if (plan && !plan.order) return <ChooseOrder plan={plan} onChoose={(order) => { setLearningOrder(order); setPlan(getStudyPlan()) }} />
@@ -41,7 +54,8 @@ export default function PlanPage() {
       <button onClick={() => inputRef.current?.click()} className="mt-5 flex w-full flex-col items-center rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 px-6 py-9 text-center transition hover:bg-primary/10">
         <Upload className="h-8 w-8 text-primary" /><span className="mt-3 font-bold text-foreground">{file ? file.name : 'Upload your syllabus'}</span><span className="mt-1 text-sm text-muted-foreground">PDF, document, text file, or clear photo</span>
       </button>
-      <p className="mt-4 text-xs leading-5 text-muted-foreground">For this demo, a text outline is read directly; document and photo uploads create a starter plan you can adjust.</p>
+      <p className="mt-4 text-xs leading-5 text-muted-foreground">A text outline is read by Susie&apos;s AI directly; document and photo uploads still create a starter plan you can adjust.</p>
+      {error && <p className="mt-4 rounded-xl bg-accent/10 px-4 py-3 text-sm font-medium text-accent">{error}</p>}
       <button onClick={makePlan} disabled={isMakingPlan || (!file && !courseName.trim())} className="button-primary mt-6 w-full py-3.5 disabled:cursor-not-allowed disabled:opacity-50">{isMakingPlan ? 'Susie is making your plan…' : 'Make my study plan'}</button>
     </section>
   </div></main>
