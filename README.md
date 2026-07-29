@@ -4,7 +4,7 @@ An AI-tutor-shaped learning app: upload a syllabus, get a mastery roadmap, and w
 through each topic in one continuous lesson — taught by Susie — instead of a stack
 of disconnected pages.
 
-Built with Next.js 16 (App Router, Turbopack), React 19, and Tailwind CSS v4.
+Built with Next.js 16 (App Router, Turbopack), React 19, and Tailwind CSS v4
 
 ## Getting started
 
