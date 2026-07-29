@@ -74,7 +74,8 @@ export async function analyzeHandworkWithAI(
     'Read the work, then determine whether it contains a mathematical error. ' +
     'If it does, diagnose the specific underlying misconception — prefer matching one of the known misconceptions below by reusing its exact id when it genuinely applies; ' +
     "only invent a new id when none of them fit. If the student's work is fully correct, set hasMistake to false and use the misconception fields to give brief, positive feedback instead. " +
-    'Never fabricate a mistake that is not actually there.\n\n' +
+    'Never fabricate a mistake that is not actually there. ' +
+    'Write every expression in plain text matching how a student would write it by hand — use √, ², ³, etc. Never use LaTeX (no \\sqrt{}, \\frac{}, or $ signs).\n\n' +
     `${topic ? `Current topic: ${topic}\n\n` : ''}` +
     `Known misconceptions:\n${bankSummary}\n\n` +
     `${input.text ? `Student's typed work:\n${input.text}` : "The student's work is in the attached image."}`
