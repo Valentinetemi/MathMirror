@@ -43,7 +43,9 @@ export default function LessonPage() {
 
   const [reviewing, setReviewing] = useState(false)
   const [reviewInput, setReviewInput] = useState('')
-  const [misconception, setMisconception] = useState<Misconception | null>(null)
+  const [misconception, setMisconception] = useState<AnalyzedMisconception | null>(null)
+  const [hasMistake, setHasMistake] = useState(true)
+  const [reviewError, setReviewError] = useState('')
 
   const [quizResult, setQuizResult] = useState<{ correct: number; total: number } | null>(null)
 
@@ -59,8 +61,16 @@ export default function LessonPage() {
 
   const handleReviewSubmit = async (data: { text?: string; image?: File }) => {
     setReviewing(true)
-    const matched = await analyzeSubmission(data, topic)
-    setMisconception(matched)
+    setReviewError('')
+    const imageBase64 = data.image ? await fileToBase64(data.image) : undefined
+    const result = await analyzeHandworkWithAI({ text: data.text, imageBase64, imageMimeType: data.image?.type }, topic)
+    if (!result.ok) {
+      setReviewError(result.error)
+      setReviewing(false)
+      return
+    }
+    setHasMistake(result.hasMistake)
+    setMisconception(result.misconception)
     recordPractice()
     setReviewing(false)
   }
@@ -181,13 +191,23 @@ export default function LessonPage() {
                   <h2 className="text-xl font-bold text-foreground">Show Susie your working</h2>
                   <p className="mt-2 text-muted-foreground">Upload a clear photo of your solution, or type the step where you got stuck.</p>
                   <div className="mt-5"><InputBox onSubmit={handleReviewSubmit} value={reviewInput} onChange={setReviewInput} isLoading={reviewing} /></div>
+                  {reviewError && (
+                    <div className="mt-4 rounded-xl bg-accent/10 px-4 py-3 text-sm font-medium text-accent">{reviewError}</div>
+                  )}
                 </>
-              ) : (
+              ) : hasMistake ? (
                 <div className="space-y-6">
                   <MisconceptionBadge label={misconception.misconception} description={misconception.description} />
                   <SocraticHintReveal misconception={misconception} />
                   <button onClick={() => setStep('quiz')} className="button-primary px-5 py-3">Continue to your mastery quiz</button>
                 </div>
+              ) : (
+                <SusieNote tone="celebrate" className="text-center">
+                  <Susie mood="celebrate" size={48} className="mx-auto text-accent-warning" />
+                  <h2 className="mt-3 text-xl font-bold">{misconception.misconception}</h2>
+                  <p className="mt-2 text-white/80">{misconception.explanation}</p>
+                  <button onClick={() => setStep('quiz')} className="button-primary mt-5 px-5 py-3">Continue to your mastery quiz</button>
+                </SusieNote>
               )}
             </section>
           )}
@@ -238,7 +258,7 @@ function DoneStep({ label }: { label: string }) {
   return <div className="flex items-center gap-2 rounded-xl bg-primary/5 px-4 py-3 text-sm font-semibold text-primary animate-slideIn"><CheckCircle2 className="h-4 w-4 shrink-0" /> {label}</div>
 }
 
-function SocraticHintReveal({ misconception }: { misconception: Misconception }) {
+function SocraticHintReveal({ misconception }: { misconception: AnalyzedMisconception }) {
   const [showExplanation, setShowExplanation] = useState(false)
   return (
     <>
