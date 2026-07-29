@@ -6,7 +6,6 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'MathMirror - Algebra Learning Companion',
   description: 'See why you got algebra wrong, not just that you did. Get step-by-step corrections and understand your misconceptions.',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
