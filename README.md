@@ -66,28 +66,3 @@ lib/
   misconceptions.ts          the misconception bank analyze.ts matches against
   progress.ts                 XP, streaks, activity log (localStorage)
 ```
-
-## Current state, honestly
-
-This is a working front-end prototype, not a production tutoring platform yet:
-
-- **No real AI or backend.** Syllabus parsing, lesson content, handwriting
-  analysis, and quiz questions are all hardcoded or keyword-matched in `lib/`,
-  not model-generated. The data shapes (`getLessonContent`, `analyzeSubmission`)
-  are written so a real API call can be dropped in later without touching the UI.
-- **No persistence beyond the browser.** Study plans and progress live in
-  `localStorage` — clearing site data resets everything.
-- **Video/resource recommendations** link to Khan Academy's stable subject-hub
-  pages, not specific deep-linked videos — deliberately, to avoid pointing at a
-  video that may not exist.
-- **Prerequisite ordering** is currently just a fixed topic list reordered by
-  simplest/hardest/syllabus choice, not a real dependency graph inferred from the
-  syllabus.
-
-## Design system
-
-Palette is "Violet Play" — violet primary, deep indigo for depth/celebration
-moments, with leaf-green and amber reserved as constant status colors (mastered /
-streak) rather than brand colors. All tokens live in `app/globals.css`'s
-`@theme inline` block; component styling should go through those tokens rather
-than hardcoded hex values.
