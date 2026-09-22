@@ -1,68 +1,13 @@
-# MathMirror
+### MathMirror
 
-An AI-tutor-shaped learning app: upload a syllabus, get a mastery roadmap, and work
-through each topic in one continuous lesson — taught by Susie — instead of a stack
-of disconnected pages.
+MathMirror is an AI math tutor I built for a hackathon. The goal was to create a learning experience that feels like a complete lesson, not a chatbot that only answers questions.
 
-Built with Next.js 16 (App Router, Turbopack), React 19, and Tailwind CSS v4
+A student uploads their syllabus, and MathMirror uses it to create a personal roadmap of the topics they need to learn. The roadmap shows the topic they are currently working on, the topics they have completed, and the ones that will unlock as they progress.
 
-## Getting started
+Each topic is taught on one page. Susie, the math mascot, explains the concept using text, visuals, or audio. The student studies a worked example, tries a problem independently, and submits their handwritten work for review. MathMirror points out possible mistakes and helps the student understand where they went wrong without immediately giving away the answer.
 
-```bash
-npm install
-npm run dev
-```
+At the end of the lesson, the student takes a short mastery quiz. When they pass, the topic is marked as completed, and the next one becomes available.
 
-Open [http://localhost:3000](http://localhost:3000). No account or API key needed —
-everything currently runs client-side against `localStorage`.
+The lesson stays on the same page from beginning to end. Finished sections become short summaries while the current activity remains open. This keeps the student focused and makes the experience feel more like a tutoring session than moving between different parts of an app.
 
-## The core loop
-
-1. **`/plan`** — upload a syllabus (or just name a course) to generate a study plan,
-   choose simplest → hardest / hardest → simplest / syllabus order, and get a
-   roadmap rendered as a winding, dashed path with locked/current/mastered topics.
-2. **`/lesson/[topic]`** — a single stateful page that walks through all seven
-   mastery steps without ever navigating away:
-   `concept → resource → guided example → independent practice → handwriting
-   review → mastery quiz → celebration`.
-   - The concept step has three real modes: **Read** (text), **Visual** (a
-     hand-built SVG diagram per topic), and **Listen** (actual text-to-speech via
-     the browser's `speechSynthesis` API).
-   - "I'm finished" expands the same page into a photo/text upload — no route
-     change — and Susie explains *why* something's wrong, not just that it is.
-   - A failed quiz doesn't dead-end; it recommends revisiting the resource or
-     example, then lets you retake it.
-3. **`/practice`** and **`/quiz`** — the same handwriting-analysis and quiz engine,
-   available standalone for quick drilling outside a specific topic.
-4. **`/dashboard`** — XP, level, quiz accuracy, and a short activity log, all local
-   to the current browser.
-
-## Project structure
-
-```
-app/
-  page.tsx                 real homepage (served at "/")
-  plan/page.tsx             syllabus upload + roadmap
-  lesson/[topic]/page.tsx    the one-page mastery flow
-  practice/page.tsx          standalone handwriting check
-  quiz/page.tsx               standalone quiz
-  dashboard/page.tsx          progress overview
-  globals.css                design tokens (Tailwind v4 @theme)
-
-components/
-  susie.tsx                mascot (SVG, mood-based)
-  susie-note.tsx            shared callout panel (note / celebrate tones)
-  roadmap-path.tsx           the winding mastery-path visual
-  concept-diagram.tsx        per-topic SVG diagrams for the "Visual" mode
-  listen-button.tsx          text-to-speech control
-  mastery-quiz.tsx           shared quiz UI (used by /quiz and the lesson flow)
-  input-box.tsx, misconception-badge.tsx, socratic-hint.tsx,
-  animated-correction.tsx, history-strip.tsx   handwriting-review UI
-
-lib/
-  study-plan.ts             study plan CRUD + topic ordering/locking (localStorage)
-  lesson-content.ts          per-topic concept/resource/example/practice/quiz content
-  analyze.ts                 handwriting → misconception matching (simulated)
-  misconceptions.ts          the misconception bank analyze.ts matches against
-  progress.ts                 XP, streaks, activity log (localStorage)
-```
+MathMirror is based on the idea that students need more than correct answers. They need clear explanations, practice, feedback, encouragement, and a learning path they can follow.
